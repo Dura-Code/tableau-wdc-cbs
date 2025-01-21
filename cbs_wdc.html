@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CBS API Web Data Connector</title>
+    <script src="https://connectors.tableau.com/libs/tableauwdc-2.3.latest.js"></script>
+    <script>
+        // Define the connector
+        const myConnector = tableau.makeConnector();
+
+        // Schema definition
+        myConnector.getSchema = function (schemaCallback) {
+            const cols = [
+                { id: "Perioden", dataType: tableau.dataTypeEnum.string },
+                { id: "Consumentenvertrouwen", dataType: tableau.dataTypeEnum.string },
+                { id: "GunstigeTijdVoorGroteAankopen", dataType: tableau.dataTypeEnum.string },
+                { id: "Koopbereidheid", dataType: tableau.dataTypeEnum.string }
+            ];
+
+            const tableSchema = {
+                id: "CBSAPIData",
+                alias: "CBS API Data from OData",
+                columns: cols
+            };
+
+            schemaCallback([tableSchema]);
+        };
+
+        // Data fetching
+        myConnector.getData = function (table, doneCallback) {
+            const apiURL = "https://opendata.cbs.nl/ODataApi/odata/83693NED/TypedDataSet";
+            console.log("fetching data")
+            fetch(apiURL)
+                .then(response => response.json())
+                .then(data => {
+                    const tableData = data.value.map(row => ({
+                        Perioden: row.Perioden,
+                        Consumentenvertrouwen: row.Consumentenvertrouwen || "",
+                        GunstigeTijdVoorGroteAankopen: row.GunstigeTijdVoorGroteAankopen || "",
+                        Koopbereidheid: row.Koopbereidheid || ""
+                    }));
+                    table.appendRows(tableData);
+                    console.log(data.value)
+                    doneCallback();
+                })
+                .catch(error => {
+                    tableau.abortWithError("Error fetching data: " + error.message);
+                });
+        };
+
+        // Register the connector
+        tableau.registerConnector(myConnector);
+
+        // Initialize Tableau after the DOM is fully loaded
+        document.addEventListener("DOMContentLoaded", function () {
+
+        });
+    </script>
+</head>
+<body>
+    <h1>CBS API Web Data Connector</h1>
+    <p>Connect to CBS Open Data API and load the data into Tableau.</p>
+    <button id="submitButton">Get Data</button>
+</body>
+</html>
