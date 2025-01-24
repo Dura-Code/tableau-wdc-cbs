@@ -1,78 +1,74 @@
 (function () {
-   
     $(document).ready(function () {
-         var myConnector = tableau.makeConnector();
+        var myConnector = tableau.makeConnector();
 
-    myConnector.getSchema = function (schemaCallback) {
-        var cols = [{
-            id: "open",
-            alias: "Open",
-            dataType: tableau.dataTypeEnum.string
-        }, {
-            id: "high",
-            alias: "High",
-            dataType: tableau.dataTypeEnum.string
-        }, {
-            id: "date",
-            alias: "Date",
-            dataType: tableau.dataTypeEnum.string
-        }, {
-            id: "low",
-            alias: "Low",
-            dataType: tableau.dataTypeEnum.string
-        }, {
-            id: "close",
-            alias: "Close",
-            dataType: tableau.dataTypeEnum.string
-        }, {
-            id: "volume",
-            alias: "Volume",
-            dataType: tableau.dataTypeEnum.string
-        }];
-    
-        var tableSchema = {
-            id: "timeSeriesDaily",
-            alias: "Stock Datas",
-            columns: cols
+        myConnector.getSchema = function (schemaCallback) {
+            var cols = [
+                {
+                    id: "Perioden",
+                    alias: "Period",
+                    dataType: tableau.dataTypeEnum.string
+                },
+                {
+                    id: "Consumentenvertrouwen_1",
+                    alias: "Consumer Confidence",
+                    dataType: tableau.dataTypeEnum.float
+                },
+                {
+                    id: "EconomischKlimaat_2",
+                    alias: "Economic Climate",
+                    dataType: tableau.dataTypeEnum.float
+                },
+                {
+                    id: "Koopbereidheid_3",
+                    alias: "Willingness to Buy",
+                    dataType: tableau.dataTypeEnum.float
+                }
+            ];
+
+            var tableSchema = {
+                id: "consumerConfidence",
+                alias: "Consumer Confidence Data from CBS",
+                columns: cols
+            };
+
+            schemaCallback([tableSchema]);
         };
-    
-        schemaCallback([tableSchema]);
-    };
 
-    myConnector.getData = function (table, doneCallback) {
-        
-        const url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=AAPL&apikey=QYOWP5SXIHB6BV3X'
-        //const url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=TSLA&apikey=QYOWP5SXIHB6BV3X'
-        $.ajax({
-            dataType: "json",
-            url: url,
-            data: {},
-            success: function(data) {
-                const allRows = []
-                const timeSeries = data['Time Series (Daily)']
-                const keys = Object.keys(timeSeries)
-                for (var i = 0 ; i < keys.length ; i++) {
-                    const key = keys[i]
-                    const actual = timeSeries[key]
-                    const expected = {}
-                    expected.open = actual['1. open'] ? actual['1. open'] : '--'
-                    expected.high = actual['2. high'] ? actual['2. high'] : '--'
-                    expected.low = actual['3. low'] ? actual['3. low'] : '--'
-                    expected.close = actual['4. close'] ? actual['4. close'] : '--'
-                    expected.volume = actual['5. volume'] ? actual['5. volume'] : '--'
-                    expected.date = key 
-                    allRows.push(expected)
+        myConnector.getData = function (table, doneCallback) {
+            const url = 'https://opendata.cbs.nl/ODataApi/odata/83693NED/TypedDataSet';
+
+            $.ajax({
+                dataType: "json",
+                url: url,
+                success: function (data) {
+                    const allRows = [];
+                    const results = data.value;
+
+                    for (var i = 0; i < results.length; i++) {
+                        const row = {
+                            "Perioden": results[i].Perioden,
+                            "Consumentenvertrouwen_1": results[i].Consumentenvertrouwen_1,
+                            "EconomischKlimaat_2": results[i].EconomischKlimaat_2,
+                            "Koopbereidheid_3": results[i].Koopbereidheid_3
+                        };
+                        allRows.push(row);
                     }
-                    
-                table.appendRows(allRows)
-                doneCallback();
-            }
-        });
-    };
 
-    tableau.registerConnector(myConnector);
-        $("#submitButton").click(function () {  
-            tableau.connectionName = "CBS web data connector";
+                    table.appendRows(allRows);
+                    doneCallback();
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching data: ", error);
+                    doneCallback();
+                }
+            });
+        };
+
+        tableau.registerConnector(myConnector);
+
+        $("#submitButton").click(function () {
+            tableau.connectionName = "CBS Consumer Confidence Data";
             tableau.submit();
         });
     });
