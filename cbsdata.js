@@ -55,8 +55,8 @@
                         const year = period.slice(0, 4); // First 4 characters represent the year
                         const month = period.slice(6, 8); // Characters after "MM" represent the month
                     
-                        // Return the formatted date string in "YYYY-MM" format
-                        return `${year}-${month}`;
+                        // Return the formatted date string in "YYYY-MM-DD" format
+                        return `${year}-${month}-01`;
                     }
 
                     for (var i = 0; i < results.length; i++) {
