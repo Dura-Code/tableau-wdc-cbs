@@ -33,7 +33,7 @@
 
             var tableSchema = {
                 id: "cbsdata",
-                alias: "CBS data",
+                alias: "CBS API data",
                 columns: cols
             };
 
@@ -83,7 +83,7 @@
         tableau.registerConnector(myConnector);
 
         $("#submitButton").click(function () {
-            tableau.connectionName = "CBS Web Data Connector";
+            tableau.connectionName = "cbsdata";
             tableau.submit();
         });
     });
