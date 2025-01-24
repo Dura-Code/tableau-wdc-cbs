@@ -32,7 +32,7 @@
             ];
 
             var tableSchema = {
-                id: "CBS Web Data Connector",
+                id: "cbsdata",
                 alias: "CBS data",
                 columns: cols
             };
