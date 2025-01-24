@@ -6,29 +6,34 @@
             var cols = [
                 {
                     id: "Perioden",
-                    alias: "Period",
-                    dataType: tableau.dataTypeEnum.string
+                    alias: "Periode",
+                    dataType: tableau.dataTypeEnum.date
                 },
                 {
                     id: "Consumentenvertrouwen_1",
-                    alias: "Consumer Confidence",
+                    alias: "Consumentenvertrouwen",
                     dataType: tableau.dataTypeEnum.float
                 },
                 {
                     id: "EconomischKlimaat_2",
-                    alias: "Economic Climate",
+                    alias: "Economische klimaat",
                     dataType: tableau.dataTypeEnum.float
                 },
                 {
                     id: "Koopbereidheid_3",
-                    alias: "Willingness to Buy",
+                    alias: "Koopbereidheid",
+                    dataType: tableau.dataTypeEnum.float
+                },
+                {
+                    id: "GunstigeTijdVoorGroteAankopen_8",
+                    alias: "Gunstige tijd voor grote aankopen",
                     dataType: tableau.dataTypeEnum.float
                 }
             ];
 
             var tableSchema = {
-                id: "consumerConfidence",
-                alias: "Consumer Confidence Data from CBS",
+                id: "CBS Web Data Connector",
+                alias: "CBS data",
                 columns: cols
             };
 
@@ -45,12 +50,22 @@
                     const allRows = [];
                     const results = data.value;
 
+                    function convertPeriodToDate(period) {
+                        // Extract the year and month from the string
+                        const year = period.slice(0, 4); // First 4 characters represent the year
+                        const month = period.slice(6, 8); // Characters after "MM" represent the month
+                    
+                        // Return the formatted date string in "YYYY-MM" format
+                        return `${year}-${month}`;
+                    }
+
                     for (var i = 0; i < results.length; i++) {
                         const row = {
-                            "Perioden": results[i].Perioden,
+                            "Perioden": convertPeriodToDate(results[i].Perioden),
                             "Consumentenvertrouwen_1": results[i].Consumentenvertrouwen_1,
                             "EconomischKlimaat_2": results[i].EconomischKlimaat_2,
-                            "Koopbereidheid_3": results[i].Koopbereidheid_3
+                            "Koopbereidheid_3": results[i].Koopbereidheid_3,
+                            "GunstigeTijdVoorGroteAankopen_8": results[i].GunstigeTijdVoorGroteAankopen_8
                         };
                         allRows.push(row);
                     }
@@ -68,7 +83,7 @@
         tableau.registerConnector(myConnector);
 
         $("#submitButton").click(function () {
-            tableau.connectionName = "CBS Consumer Confidence Data";
+            tableau.connectionName = "CBS Web Data Connector";
             tableau.submit();
         });
     });
